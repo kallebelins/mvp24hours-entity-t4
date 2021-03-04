@@ -1,0 +1,13 @@
+{
+  "database": {
+    "datasource": "",
+    "catalog": "",
+    "trustedconnection": "true",
+    "username": "",
+    "password": ""
+  },
+  "generate": true,
+  "schemafilter": "",
+  "tablefilter": "",
+  "idkeyname": false
+}

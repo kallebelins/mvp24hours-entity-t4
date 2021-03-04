@@ -1,0 +1,195 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Collections.Generic" #>
+
+//=====================================================================================
+// Developed by Kallebe Lins (kallebe.santos@outlook.com)
+// Teacher, Architect, Consultant and Project Leader
+// Virtual Card: https://www.linkedin.com/in/kallebelins
+//=====================================================================================
+// Help build a better world!
+//=====================================================================================
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
+using Mvp24Hours.Core.Entities;
+
+namespace MyProject.MyCore
+{
+	/// <summary>
+    /// Class representing Entity <#= Entity.ClassName #> in the database
+    /// </summary>
+    [DataContract(IsReference=false)]
+	[Table("<#=Entity.Name#>", Schema = "<#=Entity.Schema#>")]
+	public partial class <#= Entity.ClassName #> : EntityBase<int>
+	{
+		#region [ Primitive members ]
+	<#
+	foreach(var prop in Entity.Properties)
+	{
+	#>
+		<#  if(prop.IsPrimaryKey) { #>
+			<#  if(Entity.IdKeyName) { #>
+				/// <summary>
+				/// Gets or sets field Id
+				/// </summary>
+				[Key]
+				<# if(prop.Identity) { #>
+					[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+				<# } else { #>
+					[DatabaseGenerated(DatabaseGeneratedOption.None)]
+				<# } #>
+				<# if(!string.IsNullOrEmpty(prop.DisplayName) && prop.DisplayName != prop.Name) { #>
+					[DisplayName("<#=prop.DisplayName#>")]
+				<# } #>
+				[DataMember]
+				[Column("<#=prop.Name#>")]
+				public override <#=prop.ClrType#> Id { get; set; }
+			<# } else { #>
+				/// <summary>
+				/// Gets or sets field Id
+				/// </summary>
+				[NotMapped]
+				<# if(!string.IsNullOrEmpty(prop.DisplayName) && prop.DisplayName != prop.Name) { #>
+					[DisplayName("<#=prop.DisplayName#>")]
+				<# } #>
+				[DataMember]
+				public override <#=prop.ClrType#> Id { get { return this.<#=prop.PropertyName#>; } set { this.<#=prop.PropertyName#> = value; } }
+
+				/// <summary>
+				/// Gets or sets field <#=prop.PropertyName#>
+				/// </summary>
+				[Key]
+				<# if(prop.Identity) { #>
+					[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+				<# } else { #>
+					[DatabaseGenerated(DatabaseGeneratedOption.None)]
+				<# } #>
+				[IgnoreDataMember]
+				[Column("<#=prop.Name#>")]
+				public virtual <#=prop.ClrType#> <#=prop.PropertyName#> { get; set; }
+			<# } #>
+
+		<# } else { #>
+			/// <summary>
+			/// Gets or sets field <#=prop.PropertyName#>
+			/// </summary>
+			[DataMember] 
+		<# if(prop.RangeStart != null || prop.RangeEnd != null) { #>
+			[Range(<# if(prop.RangeStart != null) { #><#=prop.RangeStart#><# } else { #>0<# } #>,<# if(prop.RangeEnd != null) { #><#=prop.RangeEnd#><# } else { #>double.MaxValue<# } #><# if(!string.IsNullOrEmpty(prop.RangeErrorMessage)) { #>, ErrorMessage = "<#=prop.RangeErrorMessage#>"<# } #>)] 
+		<# } #>
+		<# if(!string.IsNullOrEmpty(prop.DisplayFormat)) { #>
+			[DisplayFormat(DataFormatString = "<#=prop.DisplayFormat#>")]
+		<# } #>
+		<# if(!string.IsNullOrEmpty(prop.ReqularExpression)) { #>
+			[RegularExpression("<#=prop.ReqularExpression#>"<# if(!string.IsNullOrEmpty(prop.ReqularExpressionErrorMessage)) { #>, ErrorMessage = "<#=prop.ReqularExpressionErrorMessage#>"<# } #>)] 
+		<# } #>
+		<# if(!string.IsNullOrEmpty(prop.DisplayName) && prop.DisplayName != prop.Name) { #>
+			[DisplayName("<#=prop.DisplayName#>")]
+		<# } #>
+			[Column("<#=prop.Name#>")]
+		<#  if(!prop.IsNullable) { #>
+			[Required<# if(!string.IsNullOrEmpty(prop.RequiredErrorMessage)) { #>(ErrorMessage = "<#=prop.RequiredErrorMessage#>")<# } #>]
+		<#  } #>
+		<#  if(prop.ClrType == "string" && prop.MaxLength > 0) { #>
+			[StringLength(<#=prop.MaxLength#><# if(!string.IsNullOrEmpty(prop.StringLengthErrorMessage)) { #>, ErrorMessage = "<#=prop.StringLengthErrorMessage#>"<# } #><# if(prop.MinLength != null && prop.MinLength > 0) { #>, MinimumLength = <#=prop.MinLength#><# } #>)]
+		<#  } #>
+			public virtual <#=prop.ClrType#> <#=prop.PropertyName#> { get; set; }
+
+		<# } #>
+	<#
+	}
+	#>
+		#endregion
+
+		#region [ Object members ]
+	<#
+	foreach(var nav in Models.GetNavigations(Entity))
+	{
+		if(nav.EntitySource == Entity.Name && nav.EntitySource != nav.EntityDestination) continue;
+	#>		/// <summary>
+		/// Gets or sets instance of the <#=nav.ClassNameSource#> Entity
+		/// </summary>
+		/// <remarks>
+		/// Entity Source: <#=nav.ClassNameSource#>.<#=nav.PropertyNameSource#>
+		/// Entity Destination: <#=nav.ClassNameDestination#>.<#=nav.PropertyNameDestination#>
+		/// Object String: <#=String.Concat(nav.ClassNameSource,nav.PropertyNameSource,nav.ClassNameDestination,nav.PropertyNameDestination)#>
+		/// </remarks>
+		<# 
+		if (String.Concat(nav.ClassNameSource,nav.PropertyNameSource,nav.ClassNameDestination,nav.PropertyNameDestination) == "CondominioIdPessoaCondominioCondominioId") {
+		#>
+		// [DataMember]
+		<# } else { #>
+		[DataMember]
+		<# } #>
+		[ForeignKey(nameof(<#=nav.PropertyNameDestination#>))]
+		public virtual <#=nav.ClassNameSource#> <#=ResolveObjectName(nav)#> { get; set; }
+	<#
+	}
+	#>
+		#endregion
+
+		#region [ Collections members ]
+	<#
+	foreach (var nav in Models.GetNavigations(Entity)) 
+	{
+		if(nav.EntitySource != Entity.Name && nav.EntitySource != nav.EntityDestination) continue;
+	#>		/// <summary>
+		/// <summary>
+		/// Gets or sets collection of the <#=nav.ClassNameDestination#> Entity
+		/// </summary>
+		/// <remarks>
+		/// Entity Source: <#=nav.ClassNameSource#>.<#=nav.PropertyNameSource#>
+		/// Entity Destination: <#=nav.ClassNameDestination#>.<#=nav.PropertyNameDestination#>
+		/// Collection String: <#=String.Concat(nav.ClassNameSource,nav.PropertyNameSource,nav.ClassNameDestination,nav.PropertyNameDestination)#>
+		/// </remarks>
+		<# 
+		if (String.Concat(nav.ClassNameSource,nav.PropertyNameSource,nav.ClassNameDestination,nav.PropertyNameDestination) == "PessoaIdPessoaCondominioPessoaFisicaId") {
+		#>
+		// [DataMember]
+		<# } else { #>
+		[DataMember]
+		<# } #>
+		[InverseProperty("<#=ResolveObjectName(nav)#>")]
+		public virtual IList<<#=nav.ClassNameDestination#>> <#=ResolveCollectionName(nav, Entity.ClassName)#> { get; set; }
+	<#
+	}
+	#>
+		#endregion
+
+	}
+}
+<#+
+public string ResolveObjectName(Mvp24Hours.Entity.Core.Settings.NavigationSettings nav) {
+	if (nav.PropertyNameDestination.StartsWith("Id") || nav.PropertyNameDestination.EndsWith("Id"))
+		return  nav.PropertyNameDestination.Replace("Id","");
+	else
+		return  nav.ClassNameSource;
+}
+public string ResolveCollectionName(Mvp24Hours.Entity.Core.Settings.NavigationSettings nav, string entityName) {
+	var result = nav.ClassNameDestination.Replace("Id","").Replace(ResolveObjectName(nav),"");
+	var classPropertyName = string.Format("{0}.{1}", nav.ClassNameDestination, nav.PropertyNameDestination);
+	if(pluralTables.ContainsKey(classPropertyName)) {
+		return pluralTables[classPropertyName];
+	} else if(result == entityName) {
+		return ResolveObjectName(nav);
+	} else if(pluralTables.ContainsKey(nav.ClassNameDestination)) {
+		return pluralTables[nav.ClassNameDestination];
+	} else if(!string.IsNullOrEmpty(result)) {
+		return result;
+	} else {
+		return nav.ClassNameDestination.Replace("Id","");
+	}
+}
+Dictionary<string, string> pluralTables =
+        new Dictionary<string, string>
+    {
+		/* Maps */
+
+		/* Tables */
+    };
+#>
