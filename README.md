@@ -8,6 +8,7 @@ Add the configuration below to the .csproj file
   <ItemGroup>
     <DotNetCliToolReference Include="dotnet-t4-project-tool" Version="2.0.5" />
     <PackageReference Include="Mono.TextTemplating" Version="2.0.5" />
+    <PackageReference Include="Mvp24Hours.Entity.SqlServer" Version="1.0.0" />
     <TextTemplate Include="**\*.tt" />
     <Generated Include="**\*.Generated.cs" />
   </ItemGroup>
@@ -35,7 +36,7 @@ Create a file for the ITextTemplate interface:
 Create the file that will represent the entity model or models loaded for use in ".tt", for example (ModelTemplate.cs):
 
 ```
-	public partial class ModelTemplate : ITextTemplate
+    public partial class ModelTemplate : ITextTemplate
     {
         public readonly ResultSettings Models;
         public readonly EntitySettings Entity;
@@ -63,7 +64,7 @@ The same properties of your "ModelTemplate" class can be used in your "ModelTemp
 Ready! Now just run your "Program.cs" with combining the template with the models loaded from the database:
 
 ```
-	var mvpSettings = new Mvp24Settings()
+    var mvpSettings = new Mvp24Settings()
     {
         Database = new DatabaseSettings()
         {
