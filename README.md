@@ -32,7 +32,7 @@ Create a file for the ITextTemplate interface:
 	
 ```
 
-Create the file that will represent the model with the entity or models loaded for use in the ".tt" model, for example (ModelTemplate.cs):
+Create the file that will represent the entity model or models loaded for use in ".tt", for example (ModelTemplate.cs):
 
 ```
 	public partial class ModelTemplate : ITextTemplate
@@ -71,7 +71,7 @@ Ready! Now just run your "Program.cs" with combining the template with the model
             Catalog = "",
             TrustedConnection = true
         },
-        IdKeyName = true, // Use if your table columns have the name "ID"
+        IdKeyName = true, // Use if the columns that represent your table's primary key have the name "ID"
         TableFilter = "", // Use to filter the tables you want to read
     };
 
