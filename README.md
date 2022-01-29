@@ -1,24 +1,30 @@
 # mvp24hours-entity-t4
 How to use the Mvp24Hours.Entity.SqlServer and Mono.TextTemplating library to generate templates with T4.
 
+## Tools
+Run the command below to install the T4 template engine:
+
+```
+dotnet tool install -g dotnet-t4
+```
+
 ## How to configure?
 Add the configuration below to the .csproj file
 
 ```
 <ItemGroup>
-<DotNetCliToolReference Include="dotnet-t4-project-tool" Version="2.0.5" />
-<PackageReference Include="Mono.TextTemplating" Version="2.0.5" />
-<PackageReference Include="Mvp24Hours.Entity.SqlServer" Version="1.0.0" />
-<TextTemplate Include="**\*.tt" />
-<Generated Include="**\*.Generated.cs" />
+	<PackageReference Include="Mono.TextTemplating" Version="2.0.5" />
+	<PackageReference Include="Mvp24Hours.Entity.SqlServer" Version="1.0.0" />
+	<TextTemplate Include="**\*.tt" />
+	<Generated Include="**\*.Generated.cs" />
 </ItemGroup>
 
 <Target Name="TextTemplateTransform" BeforeTargets="BeforeBuild">
-<Exec WorkingDirectory="$(ProjectDir)" Command="dotnet t4 %(TextTemplate.Identity) -c $(RootNameSpace).%(TextTemplate.Filename) -o %(TextTemplate.Filename).Generated.cs" />
+	<Exec WorkingDirectory="$(ProjectDir)" Command="t4 %(TextTemplate.Identity) -c $(RootNameSpace).%(TextTemplate.Filename) -o %(TextTemplate.Filename).Generated.cs" />
 </Target>
 
 <Target Name="TextTemplateClean" AfterTargets="Clean">
-<Delete Files="@(Generated)" />
+	<Delete Files="@(Generated)" />
 </Target>  
 ```
 

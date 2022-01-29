@@ -1,19 +1,25 @@
 # mvp24hours-entity-t4
 Como usar a biblioteca Mvp24Hours.Entity.SqlServer e Mono.TextTemplating para gerar modelos com T4.
 
+## Ferramentas
+Rode o comando abaixo para instalar a engine de template T4:
+
+```
+dotnet tool install -g dotnet-t4
+```
+
 ## Como configurar?
 Adicione a configuração abaixo ao arquivo .csproj:
 
 ```
 <ItemGroup>
-	<DotNetCliToolReference Include="dotnet-t4-project-tool" Version="2.0.5" />
 	<PackageReference Include="Mono.TextTemplating" Version="2.0.5" />
 	<TextTemplate Include="**\*.tt" />
 	<Generated Include="**\*.Generated.cs" />
 </ItemGroup>
 
 <Target Name="TextTemplateTransform" BeforeTargets="BeforeBuild">
-	<Exec WorkingDirectory="$(ProjectDir)" Command="dotnet t4 %(TextTemplate.Identity) -c $(RootNameSpace).%(TextTemplate.Filename) -o %(TextTemplate.Filename).Generated.cs" />
+	<Exec WorkingDirectory="$(ProjectDir)" Command="t4 %(TextTemplate.Identity) -c $(RootNameSpace).%(TextTemplate.Filename) -o %(TextTemplate.Filename).Generated.cs" />
 </Target>
 
 <Target Name="TextTemplateClean" AfterTargets="Clean">
